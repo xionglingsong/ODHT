@@ -6,16 +6,32 @@ ODHT 是一个 Chrome 扩展（Manifest V3），在网页上划词即可弹出�
 
 ## 为什么做 ODHT？
 
-读外刊（《经济学人》《纽约时报》《卫报》）查词学习时，有两个长期困扰我的痛点：
+ODH 是查词制卡的老牌工具，鼠标一划，释义弹出来，点一下加号就进了 Anki。用了好多年，Anki 里攒了一座外刊生词库。**ODH 降低的是机械操作的摩擦，不是思考的摩擦。** 这件事做得很好。
 
-1. **光查单词不够，前后的短语更值得记。** 查到 "hold"，但真正需要的是 "hold accountable" 或 "hold off"。上下文中的搭配和短语，往往比孤立的单词更有学习价值。原来的 ODH 只能逐词查询，要手动重新选短语、猜边界，而且很多复合词条词典里根本没有。
+但走着走着，发现两个问题一直没解决。
 
-2. **查完词想顺便把翻译也存下来。** 查完词加入 Anki 后，过几天复习时看到原句却忘了什么意思，又得重新翻译一遍。如果翻译能直接写入笔记就好了。
+### 查不了短语
 
-ODHT 针对这两个痛点：
+查到 mush，释义告诉你"糊状物"。但让你恍然大悟的，是 **turning your brain to mush**——脑子变成一团浆糊。查到 crop，你认识"庄稼"，但这儿是一批涌现的研究——**crop of studies**。查到 hold，真正该记的是 **hold accountable**，追究责任。
+
+**你查到一个词，知道它什么意思了，但你真正该学的，往往是它旁边的搭配。这些短语，才是阅读里最值钱的东西。** 但 ODH 只能查一个词，你得手动重新选、猜边界，词典里还不一定有。
+
+### 查完词，翻译呢？
+
+读到一句英文，脑子里先做一遍视译，然后想看参考译文，对比差距在哪。**这个对比的过程，就是翻译能力提升最细的时候。**
+
+更进一步，如果 Anki 卡片上同时有原句和翻译，复习时可以看着中文回译成英文，再和原句对比——这是提升写作地道性特别有效的方法。但以前做不到，自己翻一遍再开翻译软件翻一遍，手动对比，太麻烦。
+
+### 哪些摩擦该降，哪些不该
+
+**机械操作的摩擦，该降。** 重新选词、复制粘贴、手动建卡片，这些在消耗你的耐心，不是在锻炼你的大脑。
+
+**但理解上的摩擦，不该降。** 你自己拆句子、猜词义、查词典看释义的过程，这个挣扎就是学习本身。你跳过它，就跳过了让知识粘住你的那一步。
+
+ODHT 做的事：**降低不该有的机械摩擦，保留该有的认知摩擦。**
 
 - **选区扩展 & 智能短语检测** — 双击查一个词，然后用 ◀/▶ 逐词扩展选区。如果扩展后的文本正好是词典中的短语，会自动提示。一键查完整短语并加入 Anki。
-- **LLM 自动翻译** — 上下文原句自动翻译并保存为 Anki 笔记的 `autotranslation` 字段。翻译引擎采用 [豆包·翻译模型 (Doubao Seed Translation)](https://www.volcengine.com/product/doubao-translation)，覆盖 28 种语言互译，中英翻译效果逼近 DeepSeek-R1，通用多语言翻译超越或持平 GPT-4o / Gemini-2.5-Pro，告别"翻译腔"。
+- **LLM 自动翻译** — 上下文原句自动翻译并保存为 Anki 笔记的 `autotranslation` 字段。翻译引擎采用 [豆包·翻译模型 (Doubao Seed Translation)](https://console.volcengine.com/ark/region:ark+cn-beijing/model/detail?Id=doubao-seed-translation)，覆盖 28 种语言互译，中英效果逼近 DeepSeek-R1，没有翻译腔。
 
 ## ODHT 新增功能
 
@@ -54,6 +70,7 @@ ODHT 针对这两个痛点：
 
 ### LLM 翻译选项
 - **启用 LLM 翻译** — 开关自动翻译
+- **API 类型** — 使用 OpenAI **Responses API**（`/responses` 端点），非 Chat Completions API
 - **API 地址** — 默认：`https://ark.cn-beijing.volces.com/api/v3`
 - **API Key** — 你的火山引擎 API 密钥
 - **模型** — 默认：`doubao-seed-translation-250915`
@@ -61,6 +78,52 @@ ODHT 针对这两个痛点：
 ### 词典选项
 - 加载自定义词典脚本
 - 从列表中选择当前使用的词典
+
+## 自动翻译功能设置指南
+
+要启用 LLM 自动翻译并在 Anki 卡片上显示翻译结果，需按以下步骤改造 ODH 卡片模板。
+
+### 步骤一：在 Anki 中添加 `autotranslation` 字段
+
+1. 在 Anki 中导入 `ODH.apkg` 模板文件
+2. 进入 **Browse** → 选中一张 ODH 笔记 → 点击 **Fields**
+3. 在 *Fields for ODH* 窗口中点击 **Add**
+4. 在 *Field name* 输入框中填写 `autotranslation`，然后点击 **Save**
+
+### 步骤二：修改卡片背面模板
+
+1. 在 Anki 卡片编辑器中，进入 **Cards** → 选择 *Card Types for ODH*
+2. 在 **Template** 选项卡中，将 **Back Template** 替换为以下内容：
+
+```
+{{FrontSide}}
+
+<div class="section">
+<div id="back" class="items">{{glossary}}</div>
+
+{{#sentence}}
+<hr><div id="back-extra1" class="items">{{sentence}}</div>
+{{/sentence}}
+
+{{#autotranslation}}
+<hr><div id="back-extra1" class="items">{{autotranslation}}</div>
+{{/autotranslation}}
+
+{{#extrainfo}}
+<hr><div id="back-extra2" class="items">{{extrainfo}}</div>
+{{/extrainfo}}
+
+</div>
+```
+
+这样即可在卡片背面显示 `autotranslation` 字段内容。
+
+### 步骤三：配置 Chrome 扩展
+
+1. 打开 ODHT **Extension Options** 配置页面
+2. 在 **LLM Translation** 区域，开启 **Auto Translation** 功能
+3. 填写 **API URL**、**API Key** 和 **Model**（参见上方"LLM 翻译选项"）
+4. 在 **Services Options** 区域，找到 **Translation** 旁边的输入框，填写 `autotranslation`
 
 ## 开发
 

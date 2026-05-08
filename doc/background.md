@@ -42,7 +42,7 @@ After looking up a word and adding it to Anki, I'd come back days later during r
 
 **ODHT's solution: LLM Auto-Translation**
 
-The context sentence is automatically translated and saved as an `autotranslation` field in your Anki note. The translation is powered by [**Doubao Seed Translation** (豆包·翻译模型)](https://www.volcengine.com/product/doubao-translation) — a dedicated translation model from Volcano Engine:
+The context sentence is automatically translated and saved as an `autotranslation` field in your Anki note. The translation is powered by [**Doubao Seed Translation** (豆包·翻译模型)](https://console.volcengine.com/ark/region:ark+cn-beijing/model/detail?Id=doubao-seed-translation) — a dedicated translation model from Volcano Engine:
 
 - Covers **28 languages** for mutual translation
 - Chinese-English quality approaching DeepSeek-R1; multilingual quality matching or exceeding GPT-4o / Gemini-2.5-Pro
