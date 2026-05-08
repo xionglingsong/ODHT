@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/tabmenu.css">
     <link rel="stylesheet" href="css/guide.css">
-    <title>在线词典助手使用说明</title>
+    <title>译者在线词典助手使用说明</title>
 </head>
 
 <body>
@@ -16,33 +16,54 @@
         </div>
 
         <div id="tab-1" class="tabcontent">
-            <h3>在线词典助手-升级说明</h3>
-            <p>您已升级至在线词典助手1.0.1版本。如需完整文档或插件最新信息，请访问
-                <a class="notice" href="https://github.com/ninja33/ODH" target="_blank">项目主页</a>
+            <h3>ODHT - 升级说明</h3>
+            <p>感谢使用 ODHT（Online Dictionary Helper for Translators）。如需完整文档，请访问
+                <a class="notice" href="https://github.com/xionglingsong/ODHT" target="_blank">项目主页</a>
             </p>
-            <b class="notice">1.0.0版新增内容</b>
+            <b class="notice">v1.1.0 新增内容</b>
             <ol>
-                <li>修复'当访问本地html时弹窗界面UI混乱'的问题(1.0.1)</li>
-                <li>修复'插件没有符合MV3规范'的问题(1.0.0)</li>
+                <li>翻译方向可配置：Source Language / Target Language 下拉框，支持 16 种语言互译</li>
+                <li>翻译结果缓存：同一句子不重复调用 API，节省额度</li>
+                <li>翻译状态提示：弹窗显示 ⏳ 翻译中 → 翻译结果 → ⚠ 失败原因</li>
+                <li>翻译结果可编辑：直接在弹窗内修改翻译文本，改完再存入 Anki</li>
+                <li>预设 Anki 模板：新增 ODHT.apkg，导入即包含 autotranslation 字段和卡片模板</li>
             </ol>
-            <p style="float:right">作者:
-                <a class="notice" href='https://www.laohuang.net' target="_blank">你家老黄</a>
+            <b class="notice">v1.0.0 新增内容</b>
+            <ol>
+                <li>Manifest V3 迁移，兼容最新 Chrome</li>
+                <li>LLM 自动翻译：火山引擎豆包翻译模型，弹窗内显示原句翻译</li>
+                <li>选区扩展：◀/▶ 按钮逐词扩展选区，方便查询短语</li>
+                <li>智能短语检测：自动检测相邻文本是否构成已知词典短语</li>
+                <li>修复当访问本地 HTML 时弹窗界面 UI 混乱的问题</li>
+            </ol>
+            <p style="float:right">Forked from
+                <a class="notice" href='https://github.com/ninja33/ODH' target="_blank">ODH by ninja33</a>
             </p>
         </div>
 
         <div id="tab-2" class="tabcontent" style="display:none">
-            <h3>Online Dictionary Helper -- Upgrade Notes</h3>
-            <p>You extension was upgraded to v0.9.5 Here is the release note. If you need more details, please visit
-                <a class="notice" href="https://github.com/ninja33/ODH" target="_blank">Project Home</a>
+            <h3>ODHT - Upgrade Notes</h3>
+            <p>Thanks for using ODHT (Online Dictionary Helper for Translators). For full documentation, visit
+                <a class="notice" href="https://github.com/xionglingsong/ODHT" target="_blank">Project Home</a>
             </p>
-            <b class="notice">version 1.0.0</b>
+            <b class="notice">v1.1.0 What's New</b>
             <ol>
-                <li>Fix Popup window UI problem while accessing local HTML file(1.0.1)</li>
-                <li>Fix problem of 'extension doesn't follow MV3 best practices.' (1.0.0)</li>
-                </li>
+                <li>Configurable translation direction: Source/Target language dropdowns, 16 languages supported</li>
+                <li>Translation cache: same sentence won't trigger duplicate API calls</li>
+                <li>Translation status indicator: ⏳ Translating... → result → ⚠ error message</li>
+                <li>Editable translation: click to modify the translation in popup before saving to Anki</li>
+                <li>Preset Anki template: new ODHT.apkg with autotranslation field and Back Template included</li>
             </ol>
-            <p style="float:right">Author:
-                <a class="notice" href='https://www.laohuang.net' target="_blank">Ninja Huang</a>
+            <b class="notice">v1.0.0 What's New</b>
+            <ol>
+                <li>Manifest V3 migration, compatible with latest Chrome</li>
+                <li>LLM auto-translation via Volcano Engine Doubao API</li>
+                <li>Selection expand: ◀/▶ buttons to grow selection word by word for phrase lookup</li>
+                <li>Smart phrase detection: auto-suggest known dictionary phrases from adjacent text</li>
+                <li>Fix popup UI issue when accessing local HTML files</li>
+            </ol>
+            <p style="float:right">Forked from
+                <a class="notice" href='https://github.com/ninja33/ODH' target="_blank">ODH by ninja33</a>
             </p>
         </div>
 
