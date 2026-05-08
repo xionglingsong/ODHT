@@ -19,3 +19,34 @@ Basically, here is the idea.
 The **online definition** part is run by customized javascript which could be written by you or your friend and hosted on Github.com. That will hugely extend the ability of this extension to meet your specified requirement.
 
 If you are a Javascript programmer and are interested in enhancing this tool, please check [development guide](development.md).
+
+---
+
+## Why ODHT? — Extending ODH for serious readers
+
+*The following section describes the motivation behind the ODHT fork.*
+
+When reading foreign language publications — *The Economist*, *The New York Times*, *The Guardian* — for vocabulary building, two pain points kept coming back:
+
+### Pain Point 1: A word alone isn't enough
+
+You look up "hold", but what you actually need to learn is **"hold accountable"** or **"hold off"**. The collocations and phrases surrounding a word are often more valuable than the word itself. The original ODH could only look up one selected word at a time. To look up a phrase, you had to manually re-select the exact boundaries — and if the dictionary didn't have a compound entry, you were out of luck.
+
+**ODHT's solution: Selection Expand + Smart Phrase Detection**
+
+Double-click any word, then tap ◀/▶ to grow the selection one word at a time. If the expanded text happens to match a phrase in the dictionary, it's automatically suggested as a clickable link — one click to look up the full phrase and add it to Anki.
+
+### Pain Point 2: I want the translation saved with the note
+
+After looking up a word and adding it to Anki, I'd come back days later during review and see the original sentence — but have no idea what it meant. I'd have to paste it into a translator every single time. What if the translation was just *there*, permanently saved in the note?
+
+**ODHT's solution: LLM Auto-Translation**
+
+The context sentence is automatically translated and saved as an `autotranslation` field in your Anki note. The translation is powered by [**Doubao Seed Translation** (豆包·翻译模型)](https://www.volcengine.com/product/doubao-translation) — a dedicated translation model from Volcano Engine:
+
+- Covers **28 languages** for mutual translation
+- Chinese-English quality approaching DeepSeek-R1; multilingual quality matching or exceeding GPT-4o / Gemini-2.5-Pro
+- Free of "translationese" — delivers natural, faithful translations
+- Excels across scenarios: news reading, professional documents, literature, slang, and technical content
+
+The result: every Anki card now carries **word + definition + original sentence + translation**, making spaced repetition far more effective.

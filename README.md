@@ -6,6 +6,19 @@
 
 ODHT is a Chrome extension (Manifest V3) that shows dictionary definitions in a popup when you select words on any webpage, with **LLM-powered sentence translation** and **Anki flashcard creation** support.
 
+## Why ODHT?
+
+When reading foreign language articles (e.g. *The Economist*, *NYT*, *Guardian*), two things always bothered me:
+
+1. **A word alone isn't enough.** You look up "hold", but what you really need is the phrase "hold accountable" or "hold off". The context around the word matters just as much as the word itself. ODH only let you look up one word at a time — you had to manually re-select the phrase, guess the boundaries, and often the dictionary wouldn't even have the compound entry.
+
+2. **I want the translation saved too.** After looking up a word and adding it to Anki, I'd come back days later and see the sentence field but have no idea what it meant. I'd have to re-translate it every time I reviewed the card. What if the translation was just there, baked into the note?
+
+ODHT addresses both:
+
+- **Selection Expand & Phrase Detection** — Double-click a word, then tap ◀/▶ to grow the selection word by word. If the extended text matches a known dictionary phrase, it's suggested automatically. One click to look up the full phrase and add it to Anki.
+- **LLM Auto-Translation** — The context sentence is automatically translated and saved as an `autotranslation` field in your Anki note, powered by [Doubao Seed Translation](https://www.volcengine.com/product/doubao-translation) — a dedicated translation model covering 28 languages with quality rivaling GPT-4o and Gemini-2.5-Pro, free of "translationese".
+
 ## What's New in ODHT
 
 - **Manifest V3** — Compatible with latest Chrome, no more MV2 deprecation issues
