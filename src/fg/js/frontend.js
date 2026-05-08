@@ -1,4 +1,8 @@
-/* global Popup, rangeFromPoint, TextSourceRange, selectedText, isEmpty, getSentence, isConnected, addNote, getTranslation, playAudio, isValidElement*/
+/* global Popup, rangeFromPoint, TextSourceRange, selectedText, isEmpty, getSentence, isValidElement, frontend_api */
+function isAlpha(char) {
+    return /[-|A-Z|a-z| -ɏ]/.test(char);
+}
+
 class ODHFrontend {
 
     constructor() {
@@ -16,6 +20,9 @@ class ODHFrontend {
         this.popup = new Popup();
         this.timeout = null;
         this.mousemoved = false;
+        this.selectionInfo = null;
+        this.autotranslation = '';
+        this.translateSeq = 0;
 
         window.addEventListener('mousemove', e => this.onMouseMove(e));
         window.addEventListener('mousedown', e => this.onMouseDown(e));
@@ -25,7 +32,6 @@ class ODHFrontend {
         chrome.runtime.onMessage.addListener(this.onMessage.bind(this));
         window.addEventListener('message', e => this.onFrameMessage(e));
         document.addEventListener('selectionchange', e => this.userSelectionChanged(e));
-        //window.addEventListener('selectionend', e => this.onSelectionEnd(e));
     }
 
     onKeyDown(e) {
@@ -84,8 +90,6 @@ class ODHFrontend {
         // wait 500 ms after the last selection change event
         this.timeout = setTimeout(() => {
             this.onSelectionEnd(e);
-            //var selEndEvent = new CustomEvent('selectionend');
-            //window.dispatchEvent(selEndEvent);
         }, 500);
     }
 
@@ -102,16 +106,68 @@ class ODHFrontend {
         const expression = selectedText();
         if (isEmpty(expression)) return;
 
+        console.log('[ODH] onSelectionEnd, expression:', expression);
+
+        // save selection info for expand/shrink
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) {
+            const range = sel.getRangeAt(0);
+            this.selectionInfo = {
+                startNode: range.startContainer,
+                startOffset: range.startOffset,
+                endNode: range.endContainer,
+                endOffset: range.endOffset
+            };
+        }
+
         let result = await frontend_api.getTranslation(expression);
+        console.log('[ODH] getTranslation result:', result);
         if (result == null || result.length == 0) return;
         this.notes = this.buildNote(result);
+
+        // smart phrase detection: check if adjacent text matches a known phrase
+        this.suggestedPhrase = null;
+        if (this.selectionInfo) {
+            const info = this.selectionInfo;
+            const node = info.endNode;
+            if (node && node.nodeType === Node.TEXT_NODE && !expression.includes(' ')) {
+                const textAfter = node.textContent.substring(info.endOffset);
+                const wordPattern = /^(\s+\S+){0,3}/;
+                const afterMatch = textAfter.match(wordPattern);
+                if (afterMatch) {
+                    const candidates = [expression + afterMatch[0].trim()];
+                    const words = afterMatch[0].trim().split(/\s+/);
+                    for (let i = 1; i < words.length; i++) {
+                        candidates.push(expression + ' ' + words.slice(0, i).join(' '));
+                    }
+                    for (const candidate of candidates) {
+                        if (candidate === expression) continue;
+                        const candidateLower = candidate.toLowerCase();
+                        for (const note of this.notes) {
+                            if (note.expression && note.expression.toLowerCase() === candidateLower) {
+                                this.suggestedPhrase = candidate;
+                                break;
+                            }
+                        }
+                        if (this.suggestedPhrase) break;
+                    }
+                }
+            }
+        }
+
         this.popup.showNextTo({ x: this.point.x, y: this.point.y, }, await this.renderPopup(this.notes));
+
+        // trigger async auto-translation
+        this.autotranslation = '';
+        if (this.options && this.options.llm_enabled && this.sentence) {
+            this.triggerTranslation();
+        }
 
     }
 
     onMessage(request, sender, callback) {
         const { action, params, target } = request;
-        if (target !='frontend')
+        if (target != 'frontend')
             return;
 
         const method = this['api_' + action];
@@ -120,8 +176,7 @@ class ODHFrontend {
             params.callback = callback;
             method.call(this, params);
         }
-
-        callback();
+        return true;
     }
 
     api_setFrontendOptions(params) {
@@ -151,6 +206,7 @@ class ODHFrontend {
         notedef.definitions = this.notes[nindex].css + this.notes[nindex].definitions.join('<hr>');
         notedef.sentence = context;
         notedef.url = window.location.href;
+        notedef.autotranslation = this.autotranslation;
         let response = await frontend_api.addNote(notedef);
         this.popup.sendMessage('setActionState', { response, params });
     }
@@ -173,6 +229,97 @@ class ODHFrontend {
         audio.play();
 
         this.audio[url] = audio;
+    }
+
+    async triggerTranslation() {
+        let seq = ++this.translateSeq;
+        let plainSentence = this.sentence.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        let result = await frontend_api.translateSentence(plainSentence);
+        if (result && this.translateSeq === seq) {
+            this.autotranslation = result;
+            this.popup.sendMessage('setTranslation', { translation: result });
+        }
+    }
+
+    expandSelection(direction) {
+        if (!this.selectionInfo) return;
+        const info = this.selectionInfo;
+        const node = info.endNode;
+
+        // only works on text nodes
+        if (!node || node.nodeType !== Node.TEXT_NODE) return;
+        const text = node.textContent;
+
+        if (direction === 'forward') {
+            let pos = info.endOffset;
+            // skip spaces
+            while (pos < text.length && text[pos] === ' ') pos++;
+            if (pos >= text.length) return;
+            // find end of next word
+            let wordEnd = pos;
+            while (wordEnd < text.length && isAlpha(text[wordEnd])) wordEnd++;
+            if (wordEnd === pos) return;
+            info.endOffset = wordEnd;
+        } else if (direction === 'backward') {
+            let pos = info.startOffset;
+            // skip spaces
+            while (pos > 0 && text[pos - 1] === ' ') pos--;
+            if (pos <= 0) return;
+            // find start of previous word
+            let wordStart = pos;
+            while (wordStart > 0 && isAlpha(text[wordStart - 1])) wordStart--;
+            if (wordStart === pos) return;
+            info.startOffset = wordStart;
+        }
+
+        // apply new selection
+        const newRange = document.createRange();
+        newRange.setStart(info.startNode, info.startOffset);
+        newRange.setEnd(info.endNode, info.endOffset);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+
+        // re-trigger lookup
+        this.onSelectionEnd(null);
+    }
+
+    async api_expandSelection(params) {
+        this.expandSelection(params.direction);
+    }
+
+    async api_expandToPhrase(params) {
+        const phrase = params.phrase;
+        if (!this.selectionInfo || !phrase) return;
+        const info = this.selectionInfo;
+        const node = info.endNode;
+        if (!node || node.nodeType !== Node.TEXT_NODE) return;
+
+        const text = node.textContent;
+        const target = phrase.toLowerCase();
+        // expand forward word by word until we match the phrase
+        let pos = info.endOffset;
+        let current = text.substring(info.startOffset, pos).toLowerCase();
+        while (pos < text.length && current !== target) {
+            // skip space
+            while (pos < text.length && text[pos] === ' ') pos++;
+            // find end of next word
+            let wordEnd = pos;
+            while (wordEnd < text.length && isAlpha(text[wordEnd])) wordEnd++;
+            if (wordEnd === pos) break;
+            pos = wordEnd;
+            current = text.substring(info.startOffset, pos).toLowerCase();
+        }
+        if (current === target) {
+            info.endOffset = pos;
+            const newRange = document.createRange();
+            newRange.setStart(info.startNode, info.startOffset);
+            newRange.setEnd(info.endNode, info.endOffset);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            this.onSelectionEnd(null);
+        }
     }
 
     buildNote(result) {
@@ -216,6 +363,27 @@ class ODHFrontend {
             imageclass = await frontend_api.isConnected() ? 'class="odh-addnote"' : 'class="odh-addnote-disabled"';
         }
 
+        // check if selection can be expanded
+        let canExpandBackward = false;
+        let canExpandForward = false;
+        if (this.selectionInfo) {
+            const info = this.selectionInfo;
+            const node = info.endNode;
+            if (node && node.nodeType === Node.TEXT_NODE) {
+                const text = node.textContent;
+                // check forward: is there a word after endOffset?
+                let pos = info.endOffset;
+                while (pos < text.length && text[pos] === ' ') pos++;
+                canExpandForward = pos < text.length && isAlpha(text[pos]);
+                // check backward: is there a word before startOffset?
+                pos = info.startOffset;
+                while (pos > 0 && text[pos - 1] === ' ') pos--;
+                canExpandBackward = pos > 0 && isAlpha(text[pos - 1]);
+            }
+        }
+        let expandBackBtn = canExpandBackward ? '<span class="odh-expand" data-dir="backward">◀</span>' : '';
+        let expandFwdBtn = canExpandForward ? '<span class="odh-expand" data-dir="forward">▶</span>' : '';
+
         for (const [nindex, note] of notes.entries()) {
             content += note.css + '<div class="odh-note">';
             let audiosegment = '';
@@ -228,10 +396,14 @@ class ODHFrontend {
             content += `
                 <div class="odh-headsection">
                     <span class="odh-audios">${audiosegment}</span>
-                    <span class="odh-expression">${note.expression}</span>
+                    ${expandBackBtn}<span class="odh-expression">${note.expression}</span>${expandFwdBtn}
                     <span class="odh-reading">${note.reading}</span>
                     <span class="odh-extra">${note.extrainfo}</span>
                 </div>`;
+            // show phrase suggestion (only for first note)
+            if (nindex === 0 && this.suggestedPhrase) {
+                content += `<div class="odh-phrase-hint">Also: <span class="odh-phrase-link" data-phrase="${this.suggestedPhrase}">${this.suggestedPhrase}</span></div>`;
+            }
             for (const [dindex, definition] of note.definitions.entries()) {
                 let button = (services == 'none' || services == '') ? '' : `<img ${imageclass} data-nindex="${nindex}" data-dindex="${dindex}" src="${chrome.runtime.getURL('fg/img/'+ image)}" />`;
                 content += `<div class="odh-definition">${button}${definition}</div>`;
@@ -240,6 +412,9 @@ class ODHFrontend {
         }
         //content += `<textarea id="odh-context" class="odh-sentence">${this.sentence}</textarea>`;
         content += '<div id="odh-container" class="odh-sentence"></div>';
+        if (this.options && this.options.llm_enabled) {
+            content += '<div id="odh-translation" class="odh-translation"></div>';
+        }
         return this.popupHeader() + content + this.popupFooter();
     }
 
@@ -281,4 +456,4 @@ class ODHFrontend {
 }
 
 window.odh_frontend = new ODHFrontend();
-window.frontend_api= new FrontendAPI()
+window.frontend_api = new FrontendAPI();

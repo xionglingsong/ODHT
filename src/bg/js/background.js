@@ -25,7 +25,9 @@ class ODHBackground {
         const { action, params, target } = request;
         if (target != 'background')
             return;
-        
+
+        console.log('[ODH BG] onServiceMessage:', action, params);
+
         if (action == 'playAudio') {
             let { url } = params
             this.playAudio(url)
@@ -58,11 +60,16 @@ class ODHBackground {
     }
     async onSandboxMessage(e) {
         const { action, params } = e.data;
+        // Don't forward 'callback' messages to service worker - they're handled by Agent
+        if (action === 'callback') return;
         const callbackId = params.callbackId
+        console.log('[ODH BG] onSandboxMessage:', action, callbackId);
         try {
             const result = await this.sendtoServiceworker({action, params});
+            console.log('[ODH BG] onSandboxMessage result:', action, result);
             this.callback(result, callbackId);
         } catch (e) {
+            console.error('[ODH BG] onSandboxMessage error:', action, e);
             this.callback(null, callbackId);
         }
 

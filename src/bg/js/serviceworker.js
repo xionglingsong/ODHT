@@ -99,7 +99,7 @@ class ODHServiceworker {
             tags: []
         };
 
-        let fieldnames = ['expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url'];
+        let fieldnames = ['expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url', 'autotranslation'];
         for (const fieldname of fieldnames) {
             if (!options[fieldname]) continue;
             note.fields[options[fieldname]] = notedef[fieldname];
@@ -131,6 +131,8 @@ class ODHServiceworker {
         if (target != 'serviceworker')
             return;
 
+        console.log('[ODH SW] onMessage:', action, params);
+
         const method = this['api_' + action];
 
         if (typeof(method) === 'function') {
@@ -142,10 +144,17 @@ class ODHServiceworker {
 
     async sendtoBackground(request){
         request.target='background';
+        const created = await setupOffscreenDocument('/bg/background.html');
+        if (created) {
+            // Give sandbox time to load and send initBackend
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
         try {
             const result =  await chrome.runtime.sendMessage(request);
+            console.log('[ODH SW] sendtoBackground response:', request.action, result);
             return result;
         } catch (e) {
+            console.log('[ODH SW] sendtoBackground error:', e);
             return null
         }
     }
@@ -184,12 +193,14 @@ class ODHServiceworker {
 
     async api_initBackend(params) {
         let options = await optionsLoad();
+        this.options = null; // Force script reload for new sandbox
         await this.optionsChanged(options);
     }
 
     // Frontend API
     async api_getTranslation(params) {
         let { expression, callback } = params;
+        console.log('[ODH SW] api_getTranslation:', expression);
 
         // Fix https://github.com/ninja33/ODH/issues/97
         if (expression.endsWith(".")) {
@@ -228,6 +239,57 @@ class ODHServiceworker {
         }
     }
 
+    async api_translateSentence(params) {
+        let { sentence, callback } = params;
+        let options = this.options;
+
+        if (!options || !options.llm_enabled || !options.llm_apikey) {
+            callback(null);
+            return;
+        }
+
+        try {
+            let response = await fetch(`${options.llm_baseurl}/responses`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${options.llm_apikey}`
+                },
+                body: JSON.stringify({
+                    model: options.llm_model,
+                    input: [
+                        {
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'input_text',
+                                    text: sentence,
+                                    translation_options: {
+                                        source_language: 'en',
+                                        target_language: 'zh'
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                })
+            });
+            let data = await response.json();
+            let text = data?.output?.[0]?.content?.[0]?.text
+                    || data?.output?.[0]?.text
+                    || null;
+            if (text) {
+                callback(text);
+            } else {
+                console.warn('[ODH SW] Translation API unexpected response:', JSON.stringify(data));
+                callback(null);
+            }
+        } catch (err) {
+            console.error('Translation API error:', err);
+            callback(null);
+        }
+    }
+
     // Option page and Brower Action page requests handlers.
     async optionsChanged(options) {
         this.setFrontendOptions(options);
@@ -257,10 +319,12 @@ class ODHServiceworker {
         }
 
         this.options = options;
-        if (loadresults) {
+        if (loadresults && loadresults.length > 0) {
             let namelist = loadresults.map(x => x.result.objectname);
             this.options.dictSelected = namelist.includes(options.dictSelected) ? options.dictSelected : namelist[0];
             this.options.dictNamelist = loadresults.map(x => x.result);
+        } else if (!this.options.dictSelected) {
+            console.warn('[ODH SW] No dictionaries loaded, dictionary lookup will not work');
         }
         await this.setScriptsOptions(this.options);
         optionsSave(this.options);
@@ -297,7 +361,7 @@ class ODHServiceworker {
     async loadScripts(list) {
         let promises = list.map((name) => this.loadScript(name));
         let results = await Promise.all(promises);
-        return results.filter(x => { if (x.result) return x.result; });
+        return results.filter(x => x && x.result);
     }
 
     async loadScript(name) {
@@ -309,7 +373,16 @@ class ODHServiceworker {
     }
 
     async findTerm(expression) {
-        return await this.sendtoBackground({action:'findTerm', params:{expression}});
+        let result = await this.sendtoBackground({action:'findTerm', params:{expression}});
+        if (result === null) {
+            // Sandbox may have been recreated (empty dicts), force reinitialize and retry
+            console.log('[ODH SW] findTerm returned null, reinitializing sandbox...');
+            this.options = null;
+            let options = await optionsLoad();
+            await this.optionsChanged(options);
+            result = await this.sendtoBackground({action:'findTerm', params:{expression}});
+        }
+        return result;
     }
 
     async playAudio(url) {

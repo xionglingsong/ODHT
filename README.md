@@ -1,59 +1,75 @@
-# Online Dictionary Helper (with Anki support)
+# ODHT - Online Dictionary Helper for Translators
 
 [[中文版说明](README.zh_CN.md)]
 
-Online Dictionary Helper is a Chrome/Firefox extension to show definitions for words and phrases from online (or builtin) dictionary via users' selection on any webpage and PDF documents (using [pdf.js](https://mozilla.github.io/pdf.js/)), which also supports flash-card creation using [Anki](https://github.com/dae/anki) (with **[AnkiConnect](https://github.com/FooSoft/anki-connect)**, an Anki add-on, installed).
+**Based on [ODH](https://github.com/ninja33/ODH) by [ninja33](https://github.com/ninja33)** — forked with new features for translators.
 
-Details on the reasons for making this extension can be found in the [background](doc/background.md) introduction if you are interested.
+ODHT is a Chrome extension (Manifest V3) that shows dictionary definitions in a popup when you select words on any webpage, with **LLM-powered sentence translation** and **Anki flashcard creation** support.
 
-![Anki Notes](https://raw.githubusercontent.com/ninja33/ODH/master/doc/img/anki_001_640x400.png)
+## What's New in ODHT
 
-What might set this extension apart is that users can grab online dictionary content with their own customized script (running under extension development mode). For development details, please check the [development guide](doc/development.md).
+- **Manifest V3** — Compatible with latest Chrome, no more MV2 deprecation issues
+- **LLM Translation** — Auto-translates the context sentence via Volcano Engine Doubao API, shown below the dictionary popup
+- **Auto Translation field** — New Anki field `autotranslation` to save the LLM-translated sentence to your Anki notes
+- **Selection Expand** — Use ◀/▶ buttons to expand/shrink the selected word range for phrase lookup
+- **Smart Phrase Detection** — Suggests known multi-word phrases when they match adjacent text
 
-## How to use
+## How to Install (Developer Mode)
 
-- [Install from Chrome Web Store](https://chrome.google.com/webstore/detail/anki-online-dictionary-he/lppjdajkacanlmpbbcdkccjkdbpllajb?hl=en)
+1. Clone or download this repository
+2. Open Chrome → `chrome://extensions` → Enable **Developer mode** (top right)
+3. Click **Load unpacked** → select the `src/` folder
+4. The extension icon should appear in your toolbar
 
-- [Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/online-dictionary-helper/)
+## How to Use
 
-1. Install the extension first from Chrome Web Store or Firefox Add-ons, then configure and activate the extension on your demands in the options page.
-2. Open any webpage, move your mouse cursor over the word that you want to select and translate, drag and select/double-click/press **Hotkey** (defined in options page) to select the word or phrase.
-3. If the word or phrase is a clickable link, use the predefined **Hotkey** or hold the <kbd>Alt</kbd> key while selecting to translate.
-4. A popup window will show up above the selection displaying the word definition.
-5. (Optional) While Anki and AnkiConnect are installed and running, go to the `Services Options` tab in the options page to setup the Anki deck, type, and field names to put your **expression**, **sentence**, **reading**, **definition**, etc.
-6. (Optional) Press the green **(+)** button on the top right corner of each definition in the popup window to add the word or phrase to Anki as a note.
+1. Open any webpage, **double-click** or **drag-select** a word
+2. A popup appears showing the dictionary definition
+3. If LLM translation is enabled, the sentence translation appears below the definition
+4. Use ◀/▶ buttons to expand the selection to nearby words
+5. Click the green **(+)** button to add a note to Anki
 
 ## The Options Page
 
-The options of this extension are divided into three sections.
+### General Options
+- **Enabled** — Turn the extension on/off
+- **Mouse Sel.** — Enable mouse selection lookup
+- **AutoSel. Hotkey** — Key to trigger word selection (Shift/Ctrl/Alt)
+- **Max Context** — Number of context sentences extracted
+- **Max Example** — Number of example sentences from dictionary
 
-1. General Options
-    - Enabled: Turn the extension on/off.
-    - AutoSel.Hotkey: Configure the **Hotkey** to select words or phrases. Four options are available: Off(Disable the hotkey), <kbd>Shift</kbd>, <kbd>Ctrl</kbd>, and <kbd>Alt</kbd> key.
-    - Max.Context: Set the maximum number of sentences extracted from the context of the webpage.
-    - Max.Example: Set the maximum number of example sentences from the dictionary (requires support of the dictionary script).
+### AnkiConnect Options
+Setup Anki deck/type name, and map note fields: **expression**, **reading**, **definition**, **sentence**, **url**, **autotranslation**, etc.
 
-2. AnkiConnect Options: Setup Anki deck/type name, and which note fields you are going to put **expression**, **sentence**, **reading**, **definition**, etc.
+### LLM Translation Options
+- **Enable LLM Translation** — Toggle auto-translation
+- **API URL** — Default: `https://ark.cn-beijing.volces.com/api/v3`
+- **API Key** — Your Volcano Engine API key
+- **Model** — Default: `doubao-seed-translation-250915`
 
-3. Dictionary Options:
-    - Dictionary Script: Input your own script name here, and click <kbd>Load Script</kbd> button to load it.
-    - Selected Dictionary: Choose the dictionary (bultin or loaded) for the definitions on your preference.
-
-![Options Page](https://raw.githubusercontent.com/ninja33/ODH/master/doc/img/option_general_640x400_en.png)
+### Dictionary Options
+- Load custom dictionary scripts
+- Select active dictionary from the list
 
 ## Development
-### Getting started
-The source code of this extension on Github does not contain offline dictionary and English word deformation table data. You can go to the Chrome Web Store to download, or use a Chrome extension downloader to download the plugin's crx file and extract the dictionary JSON file.
 
-### Use existing script or develop by yourself
+### Getting Started
+The source code does not contain offline dictionary data. Download the extension from Chrome Web Store or extract the JSON data files from the CRX.
 
-1. You can use existing dictionary scripts in the [dictionaries list](doc/scriptlist.md).
-2. Or develop the script by yourself based on [development guide](doc/development.md).
-3. Or open an [issue](https://github.com/ninja33/ODH/issues) in this repo if you really need help.
+### Use Existing Scripts or Develop Your Own
 
-### Pull request
+1. Use existing dictionary scripts from the [dictionaries list](doc/scriptlist.md)
+2. Develop your own script following the [development guide](doc/development.md)
+3. Open an [issue](https://github.com/ninja33/ODH/issues) for help
 
-Pull requests are welcome if you want to enhance this extension, or submit your own dictionary script in the next release.
+### Pull Requests
 
-- The extension source will go to [/src](https://github.com/ninja33/ODH/tree/master/src)
-- The dictionary script will go to [/src/dict](https://github.com/ninja33/ODH/tree/master/src/dict)
+Pull requests are welcome.
+
+- Extension source: [/src](src/)
+- Dictionary scripts: [/src/dict](src/dict/)
+
+## Credits
+
+- **Original ODH** by [Zhenyu Huang (ninja33)](https://github.com/ninja33) — [github.com/ninja33/ODH](https://github.com/ninja33/ODH)
+- Licensed under the [MIT License](LICENSE)

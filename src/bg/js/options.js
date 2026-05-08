@@ -28,7 +28,7 @@ async function populateAnkiFields(options) {
     let names = await options_api.getModelFieldNames(modelName);
     if (names == null) return;
 
-    let fields = ['expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url', 'audio'];
+    let fields = ['expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url', 'audio', 'autotranslation'];
     fields.forEach(field => {
         $(`#${field}`).empty();
         $(`#${field}`).append($('<option>', { value: '', text: '' }));
@@ -166,7 +166,12 @@ async function onSaveClicked(e) {
     options.tags = $('#tags').val();
     options.duplicate = $('#duplicate').val();
 
-    let fields = ['deckname', 'typename', 'expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url', 'audio'];
+    options.llm_enabled = $('#llm_enabled').prop('checked');
+    options.llm_baseurl = $('#llm_baseurl').val();
+    options.llm_apikey = $('#llm_apikey').val();
+    options.llm_model = $('#llm_model').val();
+
+    let fields = ['deckname', 'typename', 'expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url', 'audio', 'autotranslation'];
     fields.forEach(field => {
         options[field] = $(`#${field}`).val() == null ? options[field] : $(`#${field}`).val();
     });
@@ -213,7 +218,12 @@ async function onReady() {
     $('#tags').val(options.tags);
     $('#duplicate').val(options.duplicate);
 
-    let fields = ['deckname', 'typename', 'expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url', 'audio'];
+    $('#llm_enabled').prop('checked', options.llm_enabled);
+    $('#llm_baseurl').val(options.llm_baseurl);
+    $('#llm_apikey').val(options.llm_apikey);
+    $('#llm_model').val(options.llm_model);
+
+    let fields = ['deckname', 'typename', 'expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url', 'audio', 'autotranslation'];
     fields.forEach(field => {
         $(`#${field}`).val(options[field]);
     });

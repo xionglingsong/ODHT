@@ -1,6 +1,6 @@
 {
-    "appName": { "message": "Online Dictionary Helper" },
-    "appDesc": { "message": "A translation popup tool to show online dictionary content (with anki support)" },
+    "appName": { "message": "ODHT - Dictionary Helper for Translators" },
+    "appDesc": { "message": "Dictionary popup with LLM translation and Anki support (based on ODH by ninja33)" },
     "optTitle": { "message": "Online Dictionary Helper" },
 
     "tabExtensionTitle": { "message": "Extension Options" },

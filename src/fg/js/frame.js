@@ -80,11 +80,42 @@ function hideTranslation(){
     }
 }
 
+function registerExpandLinks() {
+    for (let btn of document.getElementsByClassName('odh-expand')) {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const dir = e.currentTarget.dataset.dir;
+            window.parent.postMessage({ action: 'expandSelection', params: { direction: dir } }, '*');
+        });
+    }
+}
+
+function registerPhraseLinks() {
+    for (let link of document.getElementsByClassName('odh-phrase-link')) {
+        link.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const phrase = e.currentTarget.dataset.phrase;
+            window.parent.postMessage({ action: 'expandToPhrase', params: { phrase } }, '*');
+        });
+    }
+}
+
+function api_setTranslation(params) {
+    const el = document.querySelector('#odh-translation');
+    if (el) {
+        el.textContent = params.translation;
+    }
+}
+
 function onDomContentLoaded() {
     registerAddNoteLinks();
     registerAudioLinks();
     registerSoundLinks();
     registerHiddenClass();
+    registerExpandLinks();
+    registerPhraseLinks();
     initSpellnTranslation();
 }
 

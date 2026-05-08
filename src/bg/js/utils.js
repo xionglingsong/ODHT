@@ -30,6 +30,12 @@ function sanitizeOptions(options) {
 
         dictSelected: '',
         dictNamelist: [],
+
+        llm_enabled: false,
+        llm_baseurl: 'https://ark.cn-beijing.volces.com/api/v3',
+        llm_apikey: '',
+        llm_model: 'doubao-seed-translation-250915',
+        autotranslation: '',
     };
 
     for (const key in defaults) {
@@ -79,7 +85,7 @@ async function setupOffscreenDocument(path) {
     });
 
     if (existingContexts.length > 0) {
-        return;
+        return false;
     }
 
     // create offscreen document
@@ -88,10 +94,11 @@ async function setupOffscreenDocument(path) {
     } else {
         creating = chrome.offscreen.createDocument({
             url: path,
-            reasons: ['CLIPBOARD'],
-            justification: 'reason for needing the document',
+            reasons: ['AUDIO_PLAYBACK'],
+            justification: 'Audio playback for word pronunciation',
         });
         await creating;
         creating = null;
     }
+    return true;
 }

@@ -33,19 +33,29 @@ class Sandbox {
 
     async backend_loadScript(params) {
         let { name, callbackId } = params;
+        let url = this.buildScriptURL(name);
+        console.log('[ODH Sandbox] loadScript:', name, '→', url);
 
-        let scripttext = await api.fetch(this.buildScriptURL(name));
-        if (!scripttext) api.callback({ name, result: null }, callbackId);
+        let scripttext = await api.fetch(url);
+        if (!scripttext) {
+            console.error('[ODH Sandbox] loadScript fetch failed:', url);
+            api.callback({ name, result: null }, callbackId);
+            return;
+        }
         try {
             let SCRIPT = eval(`(${scripttext})`);
             if (SCRIPT.name && typeof SCRIPT === 'function') {
                 let script = new SCRIPT();
-                //if (!this.dicts[SCRIPT.name]) 
                 this.dicts[SCRIPT.name] = script;
                 let displayname = typeof(script.displayName) === 'function' ? await script.displayName() : SCRIPT.name;
+                console.log('[ODH Sandbox] loaded:', SCRIPT.name, '→ dicts keys:', Object.keys(this.dicts));
                 api.callback({ name, result: { objectname: SCRIPT.name, displayname } }, callbackId);
+            } else {
+                console.error('[ODH Sandbox] loadScript eval result has no name or is not a function:', SCRIPT);
+                api.callback({ name, result: null }, callbackId);
             }
         } catch (err) {
+            console.error('[ODH Sandbox] loadScript eval error:', err);
             api.callback({ name, result: null }, callbackId);
             return;
         }
@@ -53,6 +63,8 @@ class Sandbox {
 
     backend_setScriptsOptions(params) {
         let { options, callbackId } = params;
+
+        console.log('[ODH Sandbox] setScriptsOptions: dictSelected=', options.dictSelected, 'dicts keys=', Object.keys(this.dicts));
 
         for (const dictionary of Object.values(this.dicts)) {
             if (typeof(dictionary.setOptions) === 'function')
@@ -63,6 +75,14 @@ class Sandbox {
         if (this.dicts[selected]) {
             this.current = selected;
             api.callback(selected, callbackId);
+            return;
+        }
+        console.warn('[ODH Sandbox] setScriptsOptions: dict not found, trying first available');
+        // fallback: pick the first available dictionary
+        let firstKey = Object.keys(this.dicts)[0];
+        if (firstKey) {
+            this.current = firstKey;
+            api.callback(firstKey, callbackId);
             return;
         }
         api.callback(null, callbackId);

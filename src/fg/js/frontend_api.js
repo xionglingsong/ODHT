@@ -23,4 +23,8 @@ class FrontendAPI{
     async playAudio(url){
         return await this.sendtoServiceworker({action:'playAudio',params:{url}});
     }
+
+    async translateSentence(sentence){
+        return await this.sendtoServiceworker({action:'translateSentence',params:{sentence}});
+    }
 }

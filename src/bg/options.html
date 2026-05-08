@@ -90,6 +90,27 @@
                     </div>
                     <div class="clearfix"></div>
                 </div>
+                <div class="grouppanel">
+                    <div class="grouptitle">
+                        <span>LLM Translation</span>
+                    </div>
+                    <div class="leftpanel">
+                        <label>Auto Translation</label>
+                        <div class="enabled">
+                            <input type="checkbox" value=true id="llm_enabled">
+                            <label for="llm_enabled"></label>
+                        </div>
+                    </div>
+                    <div class="rightpanel">
+                        <label>API Base URL</label>
+                        <input type="text" id="llm_baseurl" placeholder="https://ark.cn-beijing.volces.com/api/v3" class="col-3x">
+                        <label>API Key</label>
+                        <input type="password" id="llm_apikey" placeholder="Your API Key" class="col-3x">
+                        <label>Model</label>
+                        <input type="text" id="llm_model" placeholder="doubao-seed-translation-250915" class="col-3x">
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
             </div>
             <div id="tab-2" class="tabcontent" style="display:none">
                 <div class="grouppanel">
@@ -153,6 +174,8 @@
                             <select id="url"></select>
                             <label for="audio" data-i18n="lblAudio">Audio</label>
                             <select id="audio"></select>
+                            <label for="autotranslation">Translation</label>
+                            <select id="autotranslation"></select>
                         </div>
                         <div class="clearfix"></div>
                         <hr>

@@ -116,3 +116,41 @@ hr {
   text-decoration: none;
   text-align: center;
 }
+
+.odh-expand {
+  cursor: pointer;
+  font-size: 0.8em;
+  color: #999;
+  padding: 0 2px;
+  user-select: none;
+  vertical-align: middle;
+}
+.odh-expand:hover {
+  color: #0d47a1;
+}
+
+.odh-phrase-hint {
+  font-size: 0.85em;
+  color: #666;
+  padding: 2px 5px;
+  margin: 2px 0;
+  background: #f0f4ff;
+  border-radius: 3px;
+}
+.odh-phrase-link {
+  color: #0d47a1;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.odh-translation {
+  font-size: 0.9em;
+  color: #555;
+  background: #f9f9f9;
+  border: 1px dashed #ccc;
+  border-radius: 3px;
+  padding: 5px 8px;
+  margin-top: 5px;
+  min-height: 1.2em;
+}

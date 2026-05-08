@@ -9,7 +9,7 @@ class Deinflector {
     }
 
     deinflect(term) {
-        return this.wordforms[term] ? this.wordforms[term] : null;
+        return (this.wordforms && this.wordforms[term]) ? this.wordforms[term] : null;
     }
 
     static async loadData(path) {

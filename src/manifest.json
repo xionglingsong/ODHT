@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "__MSG_appName__",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "default_locale": "en",
     "description": "__MSG_appDesc__",
     "icons": {
@@ -16,7 +16,7 @@
         },
         "default_popup": "bg/popup.html"
     },
-    "author": "Zhenyu Huang",
+    "author": "Based on ODH by Zhenyu Huang (ninja33)",
     "background": {
         "service_worker": "bg/js/serviceworker.js"
     },
@@ -36,6 +36,7 @@
         "page": "bg/options.html"
     },
     "permissions": ["offscreen","storage"],
+    "host_permissions": ["<all_urls>"],
     "sandbox": {
         "pages": ["bg/sandbox/sandbox.html"]
     },
