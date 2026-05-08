@@ -81,16 +81,21 @@ ODHT 做的事：**降低不该有的机械摩擦，保留该有的认知摩擦�
 
 ## 自动翻译功能设置指南
 
-要启用 LLM 自动翻译并在 Anki 卡片上显示翻译结果，需按以下步骤改造 ODH 卡片模板。
+### 快速开始（推荐）
 
-### 步骤一：在 Anki 中添加 `autotranslation` 字段
+直接在 Anki 中导入 `ODHT.apkg` 文件，已内置 `autotranslation` 字段和正确的卡片模板。然后配置 Chrome 扩展即可（见下方步骤三）。
 
-1. 在 Anki 中导入 `ODH.apkg` 模板文件
-2. 进入 **Browse** → 选中一张 ODH 笔记 → 点击 **Fields**
-3. 在 *Fields for ODH* 窗口中点击 **Add**
-4. 在 *Field name* 输入框中填写 `autotranslation`，然后点击 **Save**
+### 手动配置
 
-### 步骤二：修改卡片背面模板
+如果已有 ODH 卡片类型，可手动改造：
+
+#### 步骤一：在 Anki 中添加 `autotranslation` 字段
+
+1. 进入 **Browse** → 选中一张 ODH 笔记 → 点击 **Fields**
+2. 在 *Fields for ODH* 窗口中点击 **Add**
+3. 在 *Field name* 输入框中填写 `autotranslation`，然后点击 **Save**
+
+#### 步骤二：修改卡片背面模板
 
 1. 在 Anki 卡片编辑器中，进入 **Cards** → 选择 *Card Types for ODH*
 2. 在 **Template** 选项卡中，将 **Back Template** 替换为以下内容：

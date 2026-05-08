@@ -35,6 +35,8 @@ function sanitizeOptions(options) {
         llm_baseurl: 'https://ark.cn-beijing.volces.com/api/v3',
         llm_apikey: '',
         llm_model: 'doubao-seed-translation-250915',
+        llm_source_lang: 'en',
+        llm_target_lang: 'zh',
         autotranslation: '',
     };
 

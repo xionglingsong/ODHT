@@ -83,16 +83,21 @@ Setup Anki deck/type name, and map note fields: **expression**, **reading**, **d
 
 ## Auto Translation Setup Guide
 
-To enable the LLM auto-translation feature and display the translated sentence on your Anki card, follow these steps to modify the ODH card template.
+### Quick Start (recommended)
 
-### Step 1: Add the `autotranslation` field in Anki
+Import the bundled `ODHT.apkg` file into Anki — it already includes the `autotranslation` field and the correct Back Template. Then configure the Chrome extension (Step 3 below).
 
-1. Import the `ODH.apkg` template file into Anki
-2. Go to **Browse** → select an ODH note → click **Fields**
-3. In the *Fields for ODH* dialog, click **Add**
-4. Enter `autotranslation` in the *Field name* input, then click **Save**
+### Manual Setup
 
-### Step 2: Update the Back Template
+If you already have an ODH card type, modify it manually:
+
+#### Step 1: Add the `autotranslation` field in Anki
+
+1. Go to **Browse** → select an ODH note → click **Fields**
+2. In the *Fields for ODH* dialog, click **Add**
+3. Enter `autotranslation` in the *Field name* input, then click **Save**
+
+#### Step 2: Update the Back Template
 
 1. In the Anki card editor, go to **Cards** → select *Card Types for ODH*
 2. In the **Template** tab, replace the **Back Template** with the following:

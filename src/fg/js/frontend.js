@@ -199,14 +199,14 @@ class ODHFrontend {
     }
 
     async api_addNote(params) {
-        let { nindex, dindex, context } = params;
+        let { nindex, dindex, context, translation } = params;
 
         let notedef = Object.assign({}, this.notes[nindex]);
         notedef.definition = this.notes[nindex].css + this.notes[nindex].definitions[dindex];
         notedef.definitions = this.notes[nindex].css + this.notes[nindex].definitions.join('<hr>');
         notedef.sentence = context;
         notedef.url = window.location.href;
-        notedef.autotranslation = this.autotranslation;
+        notedef.autotranslation = translation !== undefined ? translation : this.autotranslation;
         let response = await frontend_api.addNote(notedef);
         this.popup.sendMessage('setActionState', { response, params });
     }
@@ -235,9 +235,13 @@ class ODHFrontend {
         let seq = ++this.translateSeq;
         let plainSentence = this.sentence.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
         let result = await frontend_api.translateSentence(plainSentence);
-        if (result && this.translateSeq === seq) {
-            this.autotranslation = result;
-            this.popup.sendMessage('setTranslation', { translation: result });
+        if (this.translateSeq === seq) {
+            if (result) {
+                this.autotranslation = result;
+                this.popup.sendMessage('setTranslation', { translation: result });
+            } else {
+                this.popup.sendMessage('setTranslation', { error: 'Translation failed. Check API Key and network.' });
+            }
         }
     }
 
@@ -413,7 +417,7 @@ class ODHFrontend {
         //content += `<textarea id="odh-context" class="odh-sentence">${this.sentence}</textarea>`;
         content += '<div id="odh-container" class="odh-sentence"></div>';
         if (this.options && this.options.llm_enabled) {
-            content += '<div id="odh-translation" class="odh-translation"></div>';
+            content += '<div id="odh-translation" class="odh-translation odh-trans-loading">Translating...</div>';
         }
         return this.popupHeader() + content + this.popupFooter();
     }

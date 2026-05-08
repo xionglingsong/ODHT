@@ -10,12 +10,16 @@ function registerAddNoteLinks() {
             e.preventDefault();
             const ds = e.currentTarget.dataset;
             e.currentTarget.src = getImageSource('load');
+            let translationEl = document.querySelector('#odh-translation');
+            let translation = translationEl && !translationEl.classList.contains('odh-trans-error')
+                ? translationEl.textContent : '';
             window.parent.postMessage({
                 action: 'addNote',
                 params: {
                     nindex: ds.nindex,
                     dindex: ds.dindex,
-                    context: document.querySelector('.spell-content').innerHTML
+                    context: document.querySelector('.spell-content').innerHTML,
+                    translation: translation
                 }
             }, '*');
         });
@@ -104,9 +108,18 @@ function registerPhraseLinks() {
 
 function api_setTranslation(params) {
     const el = document.querySelector('#odh-translation');
-    if (el) {
-        el.textContent = params.translation;
+    if (!el) return;
+
+    el.classList.remove('odh-trans-loading', 'odh-trans-error');
+
+    if (params.error) {
+        el.classList.add('odh-trans-error');
+        el.textContent = params.error;
+        return;
     }
+
+    el.contentEditable = 'true';
+    el.textContent = params.translation;
 }
 
 function onDomContentLoaded() {

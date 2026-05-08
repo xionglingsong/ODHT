@@ -170,6 +170,8 @@ async function onSaveClicked(e) {
     options.llm_baseurl = $('#llm_baseurl').val();
     options.llm_apikey = $('#llm_apikey').val();
     options.llm_model = $('#llm_model').val();
+    options.llm_source_lang = $('#llm_source_lang').val();
+    options.llm_target_lang = $('#llm_target_lang').val();
 
     let fields = ['deckname', 'typename', 'expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url', 'audio', 'autotranslation'];
     fields.forEach(field => {
@@ -222,6 +224,8 @@ async function onReady() {
     $('#llm_baseurl').val(options.llm_baseurl);
     $('#llm_apikey').val(options.llm_apikey);
     $('#llm_model').val(options.llm_model);
+    $('#llm_source_lang').val(options.llm_source_lang || 'en');
+    $('#llm_target_lang').val(options.llm_target_lang || 'zh');
 
     let fields = ['deckname', 'typename', 'expression', 'reading', 'extrainfo', 'definition', 'definitions', 'sentence', 'url', 'audio', 'autotranslation'];
     fields.forEach(field => {

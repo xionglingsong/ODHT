@@ -3,6 +3,7 @@ class ODHServiceworker {
     constructor() {
 
         this.options = null;
+        this.translationCache = new Map();
 
         this.ankiconnect = new Ankiconnect();
         //this.ankiweb = new Ankiweb();
@@ -248,6 +249,12 @@ class ODHServiceworker {
             return;
         }
 
+        let cacheKey = `${options.llm_source_lang || 'en'}>${options.llm_target_lang || 'zh'}:${sentence}`;
+        if (this.translationCache.has(cacheKey)) {
+            callback(this.translationCache.get(cacheKey));
+            return;
+        }
+
         try {
             let response = await fetch(`${options.llm_baseurl}/responses`, {
                 method: 'POST',
@@ -265,8 +272,8 @@ class ODHServiceworker {
                                     type: 'input_text',
                                     text: sentence,
                                     translation_options: {
-                                        source_language: 'en',
-                                        target_language: 'zh'
+                                        source_language: options.llm_source_lang || 'en',
+                                        target_language: options.llm_target_lang || 'zh'
                                     }
                                 }
                             ]
@@ -279,6 +286,11 @@ class ODHServiceworker {
                     || data?.output?.[0]?.text
                     || null;
             if (text) {
+                this.translationCache.set(cacheKey, text);
+                if (this.translationCache.size > 200) {
+                    let firstKey = this.translationCache.keys().next().value;
+                    this.translationCache.delete(firstKey);
+                }
                 callback(text);
             } else {
                 console.warn('[ODH SW] Translation API unexpected response:', JSON.stringify(data));
