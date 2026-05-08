@@ -231,11 +231,25 @@ class ODHFrontend {
         this.audio[url] = audio;
     }
 
+    async waitForPopupReady() {
+        for (let i = 0; i < 20; i++) {
+            try {
+                let iframe = this.popup.popup;
+                if (iframe && iframe.contentDocument
+                    && iframe.contentDocument.getElementById('odh-translation')) {
+                    return;
+                }
+            } catch (e) {}
+            await new Promise(r => setTimeout(r, 50));
+        }
+    }
+
     async triggerTranslation() {
         let seq = ++this.translateSeq;
         let plainSentence = this.sentence.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
         let result = await frontend_api.translateSentence(plainSentence);
         if (this.translateSeq === seq) {
+            await this.waitForPopupReady();
             if (result) {
                 this.autotranslation = result;
                 this.popup.sendMessage('setTranslation', { translation: result });
